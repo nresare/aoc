@@ -1,4 +1,4 @@
-# advent of code 2015, day 1
+# advent of code 2015, day 10
 from collections.abc import Iterator
 from typing import Tuple
 
