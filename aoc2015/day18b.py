@@ -14,10 +14,7 @@ def main():
 class Board(object):
     def __init__(self):
         self.rows = build_rows()
-        self.rows[0][0] = True
-        self.rows[0][-1] = True
-        self.rows[-1][0] = True
-        self.rows[-1][-1] = True
+        self.enable_corners()
 
     def __repr__(self):
         return "\n".join("".join("#" if x else "." for x in row) for row in self.rows)
@@ -34,6 +31,9 @@ class Board(object):
                     if count == 3:
                         data[i][j] = True
         self.rows = data
+        self.enable_corners()
+
+    def enable_corners(self):
         self.rows[0][0] = True
         self.rows[0][-1] = True
         self.rows[-1][0] = True
