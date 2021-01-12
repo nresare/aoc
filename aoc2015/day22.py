@@ -1,7 +1,7 @@
 # advent of code 2015 day 21
-import itertools
 import sys
 from abc import ABC
+from collections import deque
 from collections.abc import Iterable, Iterator
 from copy import copy
 from enum import Enum
@@ -32,6 +32,8 @@ class Character(object):
 
 
 class Spell(ABC):
+    cost = None
+
     def __init__(self, duration: int = 0, instant: bool = False):
         self.duration = duration
         self.instant = instant
@@ -115,23 +117,29 @@ RECIPES = (
     Recharge
 )
 
+Spells = tuple[Type[Spell], ...]
+
 
 def gen_winners(
         player: Character,
         opponent: Character,
-        not_more_than: int,
-        previous: tuple[Type[Spell], ...] = (),
-        cost: int = 0,
-) -> Iterator[tuple[Type[Spell], ...]]:
-    for recipe in RECIPES:
-        if cost + recipe.cost > not_more_than:
+) -> Iterator[tuple[Spells, int]]:
+    to_check: deque[tuple[Type[Spell]]] = deque((x,) for x in RECIPES)
+    cheapest = sys.maxsize
+    while to_check:
+        candidate: tuple[Type[Spell]] = to_check.popleft()
+        cost = sum(spell.cost for spell in candidate)
+        if cost > cheapest:
             continue
-        candidate = previous + (recipe,)
         outcome = play(copy(player), copy(opponent), candidate)
         if outcome == Outcome.WIN:
-            yield candidate
+            if cost < cheapest:
+                cheapest = cost
+            yield candidate, cost
         elif outcome == Outcome.OUT_OF_SPELLS:
-            yield from gen_winners(player, opponent, not_more_than, candidate, cost + recipe.cost)
+            for recipe in RECIPES:
+                # noinspection PyTypeChecker
+                to_check.append(candidate + (recipe,))
 
 
 def test():
@@ -154,18 +162,12 @@ def test():
 
 
 def main():
-    cheapest_seen = sys.maxsize
     player = Character(50, mana=500)
     opponent = Character(58, damage=9)
-    for i in itertools.count(0, 100):
-        print(f"Trying to find a winner lower than {i}")
-        for winner in gen_winners(player, opponent, i):
-            candidate = sum(i.cost for i in winner)
-            if candidate < cheapest_seen:
-                cheapest_seen = candidate
-                print(f"Found one with price {cheapest_seen}: ", " ".join(x.__name__ for x in winner))
-        if cheapest_seen != sys.maxsize:
-            return cheapest_seen
+    price = None
+    for winner, price in gen_winners(player, opponent):
+        print(f"Found one with price {price}: ", " ".join(x.__name__ for x in winner))
+    print(price)
 
 
 class Outcome(Enum):
@@ -174,7 +176,9 @@ class Outcome(Enum):
     OUT_OF_SPELLS = 3
 
 
+# noinspection PyUnusedLocal
 def log(data: str) -> None:
+    # this is used for debugging, not to be included when simply solving the problem
     pass
     # print(data)
 
