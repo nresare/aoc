@@ -32,20 +32,14 @@ def a_maps_to(configuration: tuple[str, ...]) -> str:
         raise ValueError(f"invalid configuration: {configuration}")
     return difference[0]
 
-# the two in 4 not in 1 are b and d
-# the missing ones in 9, 6, 0 are e, c, d
-
-
-# if we calculate the ones missing from the ones with one missing,
-#   the one in this set that also exist in 4 and not in 1 is 'd'
 
 def gen_missing_in_690(configuration: tuple[str, ...]) -> Iterator[tuple[str, str]]:
     for x in configuration:
         if len(x) != 6:
             continue
-        for l in ALL_SEGMENTS:
-            if l not in x:
-                yield l, x
+        for s in ALL_SEGMENTS:
+            if s not in x:
+                yield s, x
 
 
 def find_2(configuration: tuple[str, ...], f_segment: str) -> str:
@@ -88,10 +82,10 @@ def build_translation(configuration: tuple[str, ...]) -> dict[str, str]:
 
     # We know which segment of 1 that is also part of 6 (segment c)
     # the other one is segment f
-    mapping["f"] = next(x for x in digits[1] if x != mapping["c"])
+    mapping["f"] = next(x for x in digits.get(1) if x != mapping["c"])
 
     # of the 5 segment digits, the one where segment f is missing
-    # is 2. The other missing segment is b
+    # is 2.
     digits[2] = find_2(configuration, mapping["f"])
 
     # the segment missing from 2 that is not segment f, is segment b
@@ -143,7 +137,6 @@ def parse_digits(translation: dict[str, str], digits: tuple[str, ...]) -> int:
             translated = "".join(sorted(translation[c] for c in d))
             # print(f"{translated} maps to {SEGMENTS[translated]}")
             yield SEGMENTS[translated]
-    s = "".join(str(inner()))
     return int("".join(str(x) for x in inner()), 10)
 
 
