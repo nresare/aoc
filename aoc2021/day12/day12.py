@@ -37,8 +37,8 @@ def gen_paths(graph: Graph, cur: str, path: tuple[str, ...], rule):
 
 
 def find_all_paths(graph: Graph, start: str, rule):
-    paths = tuple(sorted(set(gen_paths(graph, start, (start,), rule))))
-    print(f"graph has {len(paths)} paths")
+    paths = sum(1 for x in gen_paths(graph, start, (start,), rule))
+    print(f"graph has {paths} paths")
 
 
 def forbidden_part1(path: tuple[str, ...]) -> bool:
