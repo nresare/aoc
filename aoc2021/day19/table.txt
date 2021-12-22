@@ -1,0 +1,35 @@
+    # 4 y axis rotations
+    r = a, b, c
+    r1 = -c, b, a
+    r2 = -a, b, -c
+    r3 = c, b, -a
+
+    # 4 z axis rotations after one x axis rotation
+    r4 = a, -c, b
+    r5 = c, a, b
+    r6 = -a, c, b
+    r7 = -c, -a, b
+
+    # 4 y axis rotations after one x axis rotation
+    r8 = a, -b, -c
+    r9 = c, -b, a
+    r10 = -a, -b, c
+    r11 = -c, -b, -a
+
+    # 4 z axis rotations after one x axis rotation
+    r12 = a, b, -c
+    r13 = -b, a, -c
+    r14 = -a, -b, -c
+    r15 = b, -a, -c
+
+    # 4 x-axis rotations after one z axis rotation
+    r16 = -b, a, c
+    r17 = -b, -c, a
+    r18 = -b, -a, -c
+    r19 = -b, c, -a
+
+    # 4 x-axis rotations after two(!) axis rotations
+    r20 = b, -a, c
+    r21 = b, -c, -a
+    r22 = b, a, -c
+    r23 = b, c, a
