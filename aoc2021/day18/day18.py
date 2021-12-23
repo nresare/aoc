@@ -142,4 +142,3 @@ def solve_part2(filename: str) -> int:
 
 if __name__ == "__main__":
     print(solve_part2("input.txt"))
-    # dummy()
