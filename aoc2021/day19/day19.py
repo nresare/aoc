@@ -1,15 +1,16 @@
-from collections import Counter, deque, defaultdict
+from collections import Counter, deque
 from collections.abc import Iterable
-from itertools import product
+from itertools import product, combinations
 from re import match
-from typing import NamedTuple
+from typing import NamedTuple, Optional
 
 Triplet = tuple[int, int, int]
 
 
 class Scanner(NamedTuple):
-    beacons: tuple[Triplet, ...]
     id: int
+    beacons: tuple[Triplet, ...]
+    position: Optional[Triplet]
 
 
 def gen_scanners(filename: str) -> Iterable[Scanner]:
@@ -26,7 +27,8 @@ def gen_scanners(filename: str) -> Iterable[Scanner]:
             m = match(r"^--- scanner (\d+) ---$", line)
             if m:
                 beacons = tuple(gen_coordinates())
-                yield Scanner(beacons, int(m.group(1)))
+                scanner_id = int(m.group(1))
+                yield Scanner(int(m.group(1)), beacons, (0, 0, 0) if scanner_id == 0 else None)
 
 
 def triplet_offset(a: tuple[int, int, int], b: tuple[int, int, int]) -> Triplet:
@@ -82,14 +84,7 @@ def rotate(triplet: tuple[int, int, int], rotation: int):
     return rotate_on_axis(triplet, inner_axis, rotation % 4)
 
 
-class Result(NamedTuple):
-    reference: int
-    target: int
-    offset: Triplet
-    rotation: int
-
-
-def analyse_scanner_pair(a: Scanner, b: Scanner, threshold: int = 12) -> Result:
+def analyse_scanner_pair(a: Scanner, b: Scanner, threshold: int = 12) -> Optional[Scanner]:
     for i in range(24):
         c = Counter()
         for ab, bb, in product(a.beacons, b.beacons):
@@ -98,76 +93,52 @@ def analyse_scanner_pair(a: Scanner, b: Scanner, threshold: int = 12) -> Result:
             c[offset] += 1
         offset, how_common = c.most_common(1)[0]
         if how_common >= threshold:
-            return Result(a.id, b.id, offset, i)
+            print(f"Found beacon offset for {b.id} at {offset}")
+            moved = tuple(triplet_add(offset, rotate(x, i)) for x in b.beacons)
+            return Scanner(b.id, moved, offset)
 
 
-def gen_scanner_locations(scanners: tuple[Scanner], threshold: int = 12) -> Result:
-    unreached = set(scanners[1:])
+def gen_normalised_locations(scanners: tuple[Scanner], threshold: int = 12) -> Iterable[Scanner]:
+    by_id = {s.id: s for s in scanners}
+    unreached = set(s.id for s in scanners[1:])
     to_search = deque((scanners[0],))
+    # since we align everyone to the first one, this one is already normalised
+    yield scanners[0]
     while unreached and to_search:
         current = to_search.popleft()
         found = []
-        for scanner in unreached:
-            result = analyse_scanner_pair(current, scanner, threshold)
-            if result is not None:
-                found.append(scanner)
-                yield result
+        for i in unreached:
+            scanner = by_id[i]
+            updated = analyse_scanner_pair(current, scanner, threshold)
+            if updated is not None:
+                found.append(updated)
+                yield updated
         to_search += found
-        unreached = unreached.difference(found)
+        for x in found:
+            unreached.remove(x.id)
     if unreached:
         raise ValueError(f"failed to reach {unreached}")
-
-
-def translate(triplet: Triplet, offset: Triplet, rotation) -> Triplet:
-    x, y, z = rotate(triplet, rotation)
-    return x + offset[0], y + offset[1], z + offset[2]
-
-
-def convert(beacons: Iterable[Triplet], offset: Triplet, rotation: int) -> Iterable[Triplet]:
-    for beacon in beacons:
-        yield translate(beacon, offset, rotation)
 
 
 def triplet_add(a: Triplet, b: Triplet) -> Triplet:
     return a[0] + b[0], a[1] + b[1], a[2] + b[2]
 
 
-def gen_converted_beacons(beacons: tuple[Triplet], path: tuple[Result, ...]):
-    beacon_offset = 0, 0, 0
-    for i in range(len(path)):
-        result = path[i]
-        beacons = convert(beacons, result.offset, result.rotation)
-        to_add_to_offset = result.offset
-        if i > 0:
-            to_rotate = path[i - 1].rotation
-            to_add_to_offset = rotate(to_add_to_offset, to_rotate)
-        beacon_offset = triplet_add(beacon_offset, to_add_to_offset)
-    print(f"beacon_offset: {beacon_offset}")
-    yield from beacons
-
-
-def walk(current: int, by_reference: dict[int, Result], scanners: dict[int, Scanner], path: tuple[Result, ...] = ()):
-    targets = by_reference.get(current, ())
-    print(f"visiting {current}, path: {path}")
-    yield from gen_converted_beacons(scanners[current].beacons, path)
-    for i in targets:
-        yield from walk(i.target, by_reference, scanners, path=path + (i,))
+def gen_beacon_distances(updated: Iterable[Scanner]) -> Iterable[tuple[int, tuple[int, int]]]:
+    for a, b in combinations(updated, 2):
+        distance = sum(abs(x) for x in triplet_offset(a.position, b.position))
+        yield distance, (a.id, b.id)
 
 
 def solve():
-    scanners = tuple(gen_scanners("sample.txt"))
-    results = tuple(gen_scanner_locations(scanners, 12))
+    scanners = tuple(gen_scanners("input.txt"))
+    updated = tuple(gen_normalised_locations(scanners, 12))
 
-    scanners_by_id = {s.id: s for s in scanners}
-    by_reference = defaultdict[int, Result](list)
-    for i in results:
-        by_reference[i.reference].append(i)
+    triplets = {triplet for scanner in updated for triplet in scanner.beacons}
+    print(len(triplets))
 
-    normalised_beacons = set(walk(0, by_reference, scanners_by_id))
-
-    for triplet in sorted(normalised_beacons):
-        print(triplet)
-    print(len(normalised_beacons))
+    longest_distance, between = sorted(gen_beacon_distances(updated))[-1]
+    print(f"Found longest distance {longest_distance} between {between}")
 
 
 if __name__ == "__main__":
