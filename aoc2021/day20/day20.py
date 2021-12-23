@@ -6,13 +6,13 @@ def dbg(to_print: str):
 
 
 class Image(object):
-    def __init__(self, lit: tuple[tuple[int, int], ...], generation: int = 0):
+    def __init__(self, lit: tuple[tuple[int, int], ...], inverted: bool = False):
         self.min_x = min(i[0] for i in lit)
         self.max_x = max(i[0] for i in lit)
         self.min_y = min(i[1] for i in lit)
         self.max_y = max(i[1] for i in lit)
         self.lit = frozenset(lit)
-        self.generation = generation
+        self.inverted = inverted
 
     def print(self):
         def pixel(x, y):
@@ -22,50 +22,42 @@ class Image(object):
             print("".join(pixel(i, j) for j in range(self.min_y, self.max_y + 1)))
 
     def gen_meaningful_coordinates(self):
-        border = 10 - (3 * self.generation)
-        dbg(f"border: {border}")
-        # dbg(f"border box {self.min_x - border}, {self.max_x + 1 + border}, {self.min_y - border}, {self.max_y + 1 + border}")
-        for i in range(0 - border, 101 + border):
-            for j in range(0 - border, 101 + border):
+
+        for i in range(self.min_x - 1, self.max_x + 2):
+            for j in range(self.min_y - 1, self.max_y + 2):
                 yield i, j
 
-        # for i in range(self.min_x - border, self.max_x + 1 + border):
-        #     for j in range(self.min_y - border, self.max_y + 1 + border):
-        #         yield i, j
+    def lookup_value(self, x, y) -> int:
+        def value(i):
+            return "1" if (i in self.lit) != self.inverted else "0"
 
-    def lookup_value(self, xy) -> int:
-        neighbours = tuple(gen_neighbours(xy))
-        # print_neighbours(neighbours, self.lit)
-        binstring = "".join("1" if x in self.lit else "0" for x in gen_neighbours(xy))
-        # dbg(f"binstring: {binstring}, value {int(binstring, 2)}")
-        return int(binstring, 2)
+        return int("".join(value(i) for i in gen_neighbours(x, y)), 2)
 
     def make_enhanced(self, enhancement: tuple[bool]) -> "Image":
+        # if the first bit of enhancement is True, a pixel with all
+        # dark pixels will be light, which means that the infinite
+        # space of dark pixels will be flipping to light. To handle
+        # this correctly, we invert the meaning of the lit tuples,
+        invert = enhancement[0] and not self.inverted
 
         def gen_lit_coordinates():
-            for xy in self.gen_meaningful_coordinates():
+            for x, y in self.gen_meaningful_coordinates():
                 # dbg(f"Calculating output for pixel: {xy}")
-                value = self.lookup_value(xy)
+                value = self.lookup_value(x, y)
                 # dbg(f"value: {enhancement[value]}")
-                if enhancement[value]:
-                    yield xy
+                if enhancement[value] != invert:
+                    yield x, y
 
-        return Image(tuple(gen_lit_coordinates()), generation=self.generation + 1)
+        return Image(tuple(gen_lit_coordinates()), inverted=invert)
 
     def count_lit(self) -> int:
+        if self.inverted:
+            raise ValueError("Infinite light pixels this time, enhance one more time!")
         return len(self.lit)
 
 
-def print_neighbours(neighbours: tuple[tuple[int, int], ...], lit: frozenset[tuple[int, int]]):
-    for i in range(3):
-        dbg(" ".join("#" if neighbours[i * 3 + j] in lit else "." for j in range(3)))
-
-
-def gen_neighbours(xy: tuple[int, int]) -> Iterable[tuple[int, int]]:
-    x, y = xy
-    for i in range(x - 1, x + 2):
-        for j in range(y - 1, y + 2):
-            yield i, j
+def gen_neighbours(x: int, y: int) -> Iterable[tuple[int, int]]:
+    return ((i, j) for i in range(x - 1, x + 2) for j in range(y - 1, y + 2))
 
 
 def parse_input(filename: str) -> tuple[tuple[bool, ...], Image]:
@@ -92,7 +84,10 @@ def solve():
     for i in range(2):
         print("enhancing..")
         image = image.make_enhanced(enhancement)
-    image.print()
+    print(f"image size: {image.count_lit()}")
+    for i in range(48):
+        print("enhancing..")
+        image = image.make_enhanced(enhancement)
     print(f"image size: {image.count_lit()}")
 
 
