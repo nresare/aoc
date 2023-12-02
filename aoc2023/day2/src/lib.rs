@@ -16,7 +16,7 @@ impl Game {
         &self.rounds
     }
 }
-#[derive(PartialEq, Debug, Clone, Copy)]
+#[derive(PartialEq, Debug, Clone)]
 pub struct CubeCount {
     red: u32,
     green: u32,

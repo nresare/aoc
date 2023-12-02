@@ -1,4 +1,4 @@
-use day2::CubeCount;
+use day2::{CubeCount, Game};
 use day2::parse::get_games;
 use anyhow::Result;
 fn main() -> Result<()> {
@@ -6,7 +6,8 @@ fn main() -> Result<()> {
 
     let games = get_games(include_str!("data.txt"))?;
     let sum: u32 = games.iter()
-        .map(|g| min_cube_count(g.rounds()))
+        .map(Game::rounds)
+        .map(|x| min_cube_count(x))
         .map(CubeCount::power)
         .sum();
     println!("Sum of the powers is {}", sum);

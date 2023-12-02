@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use anyhow::{Result, anyhow};
-use phf::phf_map;
+
 fn main() -> Result<()> {
     let mut sum: u32 = 0;
     let m = build_map();
@@ -46,8 +46,8 @@ fn number_from_line(
 ) -> Result<u32> {
     let s = format!(
         "{}{}",
-        get_first_number(line, &map)?,
-        get_first_number(rev(line), &rev_map)?
+        get_first_number(line, map)?,
+        get_first_number(rev(line), rev_map)?
     );
     dbg!(&s, &line);
     Ok(s.parse()?)
