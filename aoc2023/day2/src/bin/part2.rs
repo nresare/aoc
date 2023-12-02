@@ -7,7 +7,7 @@ fn main() -> Result<()> {
     let games = get_games(include_str!("data.txt"))?;
     let sum: u32 = games.iter()
         .map(Game::rounds)
-        .map(|x| min_cube_count(x))
+        .map(min_cube_count)
         .map(CubeCount::power)
         .sum();
     println!("Sum of the powers is {}", sum);

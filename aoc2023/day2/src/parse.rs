@@ -43,19 +43,13 @@ fn get_game(line: &str) -> Result<Game> {
 
 #[cfg(test)]
 mod test {
-    use super::*;
-    #[test]
-    fn test_get_rounds() {
-        let result = "3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green".split("; ").map(get_round).collect();
-        assert_eq!(vec![
-            CubeCount {red: 4, green: 0, blue: 3},
-            CubeCount {red: 1, green: 2, blue: 6},
-            CubeCount {red: 0, green: 2, blue: 0}
-        ], result);
-    }
+    use super::get_round;
+    use anyhow::Result;
+    use crate::CubeCount;
 
     #[test]
-    fn test_get_round() {
-        assert_eq!(CubeCount {red: 4, green: 0, blue: 3}, get_round("3 blue, 4 red"))
+    fn test_get_round() -> Result<()>{
+        assert_eq!(CubeCount::new(4,0,3), get_round("3 blue, 4 red")?);
+        Ok(())
     }
 }

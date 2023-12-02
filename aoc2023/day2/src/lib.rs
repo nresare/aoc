@@ -12,8 +12,8 @@ impl Game {
         self.id
     }
 
-    pub fn rounds(&self) -> &Vec<CubeCount> {
-        &self.rounds
+    pub fn rounds(&self) -> &[CubeCount] {
+        self.rounds.as_slice()
     }
 }
 #[derive(PartialEq, Debug, Clone)]
