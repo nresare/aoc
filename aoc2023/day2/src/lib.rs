@@ -25,7 +25,7 @@ pub struct CubeCount {
 
 impl CubeCount {
     pub fn new(red: u32, green: u32, blue: u32) -> Self {
-        CubeCount{red, green, blue}
+        CubeCount { red, green, blue }
     }
 
     pub fn valid_for(&self, other: &CubeCount) -> bool {
@@ -33,7 +33,7 @@ impl CubeCount {
     }
 
     pub fn max(self, other: CubeCount) -> CubeCount {
-        CubeCount{
+        CubeCount {
             red: max(self.red, other.red),
             green: max(self.green, other.green),
             blue: max(self.blue, other.blue),

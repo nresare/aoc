@@ -1,5 +1,5 @@
+use anyhow::{anyhow, Result};
 use std::collections::HashMap;
-use anyhow::{Result, anyhow};
 
 fn main() -> Result<()> {
     let mut sum: u32 = 0;
@@ -12,11 +12,14 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn build_map() -> HashMap<String, u8>{
+fn build_map() -> HashMap<String, u8> {
     let mut map = HashMap::new();
     for (i, w) in [
-        "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"
-    ].into_iter().enumerate() {
+        "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
+    ]
+    .into_iter()
+    .enumerate()
+    {
         map.insert(String::from(w), i as u8 + 1);
     }
 
@@ -34,8 +37,7 @@ fn reverse_keys(map: &HashMap<String, u8>) -> HashMap<String, u8> {
     result
 }
 
-fn rev(s: impl Into<String>) -> String
-{
+fn rev(s: impl Into<String>) -> String {
     s.into().chars().rev().collect()
 }
 
@@ -75,5 +77,4 @@ mod tests {
         assert_eq!(3, get_first_number("ab3", &map).unwrap());
         assert_eq!(8, get_first_number("eightwo", &map).unwrap());
     }
-
 }

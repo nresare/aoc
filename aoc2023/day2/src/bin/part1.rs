@@ -1,5 +1,5 @@
-use day2::parse::get_games;
 use anyhow::Result;
+use day2::parse::get_games;
 use day2::{CubeCount, Game};
 
 fn main() -> Result<()> {
@@ -7,7 +7,8 @@ fn main() -> Result<()> {
 
     let games = get_games(include_str!("data.txt"))?;
     let true_count = &CubeCount::new(12, 13, 14);
-    let sum: u32 =  games.into_iter()
+    let sum: u32 = games
+        .into_iter()
         .filter(|g| valid_game(g.rounds(), true_count))
         .map(Game::id)
         .sum();
@@ -21,23 +22,22 @@ fn valid_game(rounds: &[CubeCount], true_count: &CubeCount) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use day2::CubeCount;
     use crate::valid_game;
+    use day2::CubeCount;
 
     #[test]
     fn test_valid_game() {
-        assert_eq!(true, valid_game(
-            &vec![CubeCount::new(4, 3, 9)],
-            &CubeCount::new(4, 5, 10)
-        ));
+        assert_eq!(
+            true,
+            valid_game(&vec![CubeCount::new(4, 3, 9)], &CubeCount::new(4, 5, 10))
+        );
 
-        assert_eq!(false, valid_game(
-            &vec![
-                CubeCount::new(4, 3, 9),
-                CubeCount::new(5, 5, 10)
-            ],
-            &CubeCount::new(4, 5, 10)
-        ));
-
+        assert_eq!(
+            false,
+            valid_game(
+                &vec![CubeCount::new(4, 3, 9), CubeCount::new(5, 5, 10)],
+                &CubeCount::new(4, 5, 10)
+            )
+        );
     }
 }

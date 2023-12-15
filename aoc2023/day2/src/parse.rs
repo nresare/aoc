@@ -1,6 +1,5 @@
-
+use crate::{CubeCount, Game};
 use anyhow::{anyhow, Result};
-use crate::{Game, CubeCount};
 use lazy_static::lazy_static;
 use regex::Regex;
 
@@ -26,10 +25,10 @@ fn get_round(input: &str) -> Result<CubeCount> {
             "red" => red = count,
             "green" => green = count,
             "blue" => blue = count,
-            _ => return Err(anyhow!("illegal colour"))
+            _ => return Err(anyhow!("illegal colour")),
         }
     }
-    Ok(CubeCount {red, green, blue})
+    Ok(CubeCount { red, green, blue })
 }
 
 fn get_game(line: &str) -> Result<Game> {
@@ -37,19 +36,18 @@ fn get_game(line: &str) -> Result<Game> {
     let id: u32 = captures.get(1).unwrap().as_str().parse()?;
     let input = captures.get(2).unwrap().as_str();
     let rounds: Vec<CubeCount> = input.split("; ").map(get_round).collect::<Result<_, _>>()?;
-    Ok(Game{id, rounds})
+    Ok(Game { id, rounds })
 }
-
 
 #[cfg(test)]
 mod test {
     use super::get_round;
-    use anyhow::Result;
     use crate::CubeCount;
+    use anyhow::Result;
 
     #[test]
-    fn test_get_round() -> Result<()>{
-        assert_eq!(CubeCount::new(4,0,3), get_round("3 blue, 4 red")?);
+    fn test_get_round() -> Result<()> {
+        assert_eq!(CubeCount::new(4, 0, 3), get_round("3 blue, 4 red")?);
         Ok(())
     }
 }

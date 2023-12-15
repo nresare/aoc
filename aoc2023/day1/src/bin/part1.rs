@@ -1,4 +1,4 @@
-use anyhow::{Result, anyhow};
+use anyhow::{anyhow, Result};
 
 fn main() -> Result<()> {
     let mut sum: u32 = 0;
@@ -21,7 +21,7 @@ fn number_from_line(line: &str) -> Result<u32> {
 fn get_first_number(chars: impl Iterator<Item = char>) -> Result<char> {
     for c in chars {
         if c.is_ascii_digit() {
-            return Ok(c)
+            return Ok(c);
         }
     }
     Err(anyhow!("Could not find a number in chars"))
@@ -45,5 +45,4 @@ mod tests {
     fn test_number_from_line() {
         assert_eq!(12, number_from_line("1abc2").unwrap());
     }
-
 }

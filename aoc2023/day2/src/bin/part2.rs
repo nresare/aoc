@@ -1,11 +1,12 @@
-use day2::{CubeCount, Game};
-use day2::parse::get_games;
 use anyhow::Result;
+use day2::parse::get_games;
+use day2::{CubeCount, Game};
 fn main() -> Result<()> {
     println!("Advent of code 2023, day 2 part 2");
 
     let games = get_games(include_str!("data.txt"))?;
-    let sum: u32 = games.iter()
+    let sum: u32 = games
+        .iter()
         .map(Game::rounds)
         .map(min_cube_count)
         .map(CubeCount::power)
@@ -15,9 +16,9 @@ fn main() -> Result<()> {
 }
 
 fn min_cube_count(rounds: &[CubeCount]) -> CubeCount {
-    rounds.iter()
+    rounds
+        .iter()
         .map(CubeCount::clone)
         .reduce(|left, right| left.max(right))
         .expect("empty list of rounds")
 }
-
