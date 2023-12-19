@@ -28,7 +28,7 @@ impl Card {
     fn points(&self) -> i32 {
         match self.winners() {
             0 => 0,
-            i => 1 << i - 1,
+            i => 1 << (i - 1),
         }
     }
 
@@ -44,19 +44,36 @@ impl Card {
 }
 
 fn main() -> Result<()> {
-    let cards: Vec<Card> = include_str!("example.txt").lines().map(Card::parse).collect::<Result<_>>()?;
+    let cards: Vec<Card> = include_str!("input.txt").lines().map(Card::parse).collect::<Result<_>>()?;
     println!("part 1: {}", cards.iter().map(Card::points).sum::<i32>());
-    let mut m = HashMap::new();
-    for (i, card) in cards.iter().enumerate() {
-        let number = i + 1;
-        m.entry(number).and_modify(|i| i.increment()).or_insert(1);
-        println!("{} {:?}", number, card);
+    let mut m: HashMap<i32, i32> = HashMap::new();
+
+    for i in 1..=cards.len() {
+        m.insert(i as i32, 1);
     }
+
+    for (number, card) in cards.iter().enumerate().map(card_id) {
+        let current = *m.get(&number).unwrap();
+        for winner in 1..=card.winners() {
+            increment(&mut m, number + winner, current);
+        }
+    }
+    println!("part 2: {}", m.values().sum::<i32>());
     Ok(())
 }
 
+fn increment(m: &mut HashMap<i32, i32>, id: i32, increment: i32) {
+    m.entry(id).and_modify(|i| *i += increment).or_insert(increment);
+}
+
+fn card_id(t: (usize, &Card)) -> (i32, &Card) {
+    ((t.0 + 1) as i32, t.1)
+}
+
+
 #[cfg(test)]
 mod tests {
+    use std::collections::HashMap;
     use crate::Card;
 
     #[test]
@@ -68,4 +85,13 @@ mod tests {
         }, card);
     }
 
+
+    #[test]
+    fn test_counter() {
+        let mut map: HashMap<i32, i32> = HashMap::new();
+        map.entry(42).and_modify(|x| *x += 1).or_insert(1);
+        map.entry(42).and_modify(|x| *x += 1).or_insert(1);
+        map.entry(47).and_modify(|x| *x += 1).or_insert(1);
+        assert_eq!(HashMap::from([(42,2), (47,1)]), map);
+    }
 }
