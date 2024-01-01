@@ -1,15 +1,35 @@
 use crate::parse::parse;
-use std::vec::IntoIter;
+use crate::range::Range;
 mod parse;
+mod range;
 
 fn main() {
     let (numbers, steps) = parse(include_str!("input.txt"));
 
-    println!("Part 1: {}", smallest(numbers.iter().map(|i| *i), &steps));
-    println!("Part 2: {}", smallest(make_seed_iterator(numbers), &steps))
+    println!("Part 1: {}", smallest(numbers.clone(), &steps));
+    let ranges = apply_steps_to_ranges(make_ranges(&numbers), &steps);
+    println!("Part 2: {}", smallest_from_ranges(ranges));
 }
 
-fn smallest(seeds: impl Iterator<Item=u64>, steps: &Vec<Step>) -> u64 {
+fn apply_steps_to_ranges(mut ranges: Vec<Range>, steps: &Vec<Step>) -> Vec<Range> {
+    for step in steps.iter() {
+        ranges = range::apply_step(&ranges, step)
+    }
+    ranges
+}
+
+fn smallest_from_ranges(ranges: Vec<Range>) -> u64 {
+    let mut smallest = u64::MAX;
+    for r in ranges {
+        if r.start < smallest {
+            smallest = r.start;
+        }
+    }
+    smallest
+}
+
+// deprecated
+fn smallest(seeds: Vec<u64>, steps: &Vec<Step>) -> u64 {
     let mut smallest = u64::MAX;
     for seed in seeds {
         let mut s = seed;
@@ -23,52 +43,18 @@ fn smallest(seeds: impl Iterator<Item=u64>, steps: &Vec<Step>) -> u64 {
     smallest
 }
 
-fn make_seed_iterator(seeds: Vec<u64>) -> SeedIterator {
-    SeedIterator {
-        seeds: seeds.into_iter(),
-        next: 0,
-        count: 0,
-        total: 0,
-    }
-}
-
-struct SeedIterator {
-    seeds: IntoIter<u64>,
-    next: u64,
-    count: u64,
-    total: u64,
-}
-
-impl Iterator for SeedIterator {
-    type Item = u64;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.count < 1 {
-            self.try_fill();
-        }
-        if self.count < 1 {
-            return None;
-        }
-        self.count -= 1;
-        let i = self.next;
-        self.next += 1;
-        self.total += 1;
-        if self.total % 10_000_000 == 0 {
-            println!("Progression: {}", self.total as f32 / 2037733040f32)
-        }
-        Some(i)
-    }
-}
-
-impl SeedIterator {
-    fn try_fill(&mut self) {
-        if let Some(next) = self.seeds.next() {
-            let count = self.seeds.next().expect("seeds needs to come in pairs");
-            assert_ne!(0, count);
-            self.next = next;
-            self.count = count;
+fn make_ranges(numbers: &Vec<u64>) -> Vec<Range> {
+    let mut result = Vec::new();
+    let mut numbers = numbers.iter();
+    loop {
+        if let Some(start) = numbers.next() {
+            let length =  *numbers.next().expect("numbers must be even pairs");
+            result.push(Range::new(*start, start + length));
+        } else {
+            break;
         }
     }
+    result
 }
 
 #[derive(Clone, PartialEq, Debug)]
@@ -113,7 +99,8 @@ fn apply_step(seed: u64, step: &Step) -> u64 {
 
 #[cfg(test)]
 mod tests {
-    use crate::{apply_step, make_seed_iterator, try_map, Map, Step};
+    use crate::{apply_step, try_map, Map, Step, make_ranges};
+    use crate::range::Range;
 
     #[test]
     fn test_try_map() {
@@ -135,18 +122,9 @@ mod tests {
     }
 
     #[test]
-    fn test_seed_iterator() {
-        let iter = make_seed_iterator(vec![1, 3, 5, 5]);
-        assert_eq!(vec![1, 2, 3, 5, 6, 7, 8, 9], iter.collect::<Vec<_>>());
+    fn test_make_ranges() {
+        let result = make_ranges(&vec![55, 8, 19, 7]);
+        assert_eq!(vec![Range::new(55, 63), Range::new(19, 26)], result);
     }
 
-    #[test]
-    fn test_count_part2_seeds() {
-        let iter = make_seed_iterator(vec![858905075, 56936593, 947763189, 267019426, 206349064, 252409474, 660226451, 92561087, 752930744, 24162055, 75704321, 63600948, 3866217991, 323477533, 3356941271, 54368890, 1755537789, 475537300, 1327269841, 427659734]);
-        let mut n = 0;
-        for i in iter {
-            n += 1;
-        }
-        println!("total number of seeds: {}", n);
-}
 }
