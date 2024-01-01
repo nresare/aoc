@@ -30,11 +30,11 @@ fn parse_part_2(data: &str) -> Vec<Race> {
     let lines: Vec<_> = data.lines().collect();
     assert_eq!(2, lines.len());
     let time: u64 = lines[0]["Time: ".len()..]
-        .replace(" ", "")
+        .replace(' ', "")
         .parse()
         .expect("failed to parse time");
     let distance: u64 = lines[1]["Distance: ".len()..]
-        .replace(" ", "")
+        .replace(' ', "")
         .parse()
         .expect("failed to parse distance");
     vec![Race { time, distance }]
@@ -49,7 +49,7 @@ fn parse(data: &str) -> Vec<Race> {
     times.next();
     distances.next();
     let mut result = Vec::new();
-    while let Some(time) = times.next() {
+    for time in times {
         let distance = distances
             .next()
             .expect("too few distances")

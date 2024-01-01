@@ -11,8 +11,8 @@ fn main() {
     println!("Part 2: {}", smallest_from_ranges(ranges));
 }
 
-fn apply_steps_to_ranges(mut ranges: Vec<Range>, steps: &Vec<Step>) -> Vec<Range> {
-    for step in steps.iter() {
+fn apply_steps_to_ranges(mut ranges: Vec<Range>, steps: &[Step]) -> Vec<Range> {
+    for step in steps {
         ranges = range::apply_step(&ranges, step)
     }
     ranges
@@ -43,7 +43,7 @@ fn smallest(seeds: Vec<u64>, steps: &Vec<Step>) -> u64 {
     smallest
 }
 
-fn make_ranges(numbers: &Vec<u64>) -> Vec<Range> {
+fn make_ranges(numbers: &[u64]) -> Vec<Range> {
     let mut result = Vec::new();
     let mut numbers = numbers.iter();
     while let Some(start) = numbers.next() {

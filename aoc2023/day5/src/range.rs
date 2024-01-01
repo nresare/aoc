@@ -26,8 +26,8 @@ impl Range {
     }
 }
 
-pub fn apply_step(ranges: &Vec<Range>, step: &Step) -> Vec<Range> {
-    let mut inputs: Vec<Range> = ranges.clone();
+pub fn apply_step(ranges: &[Range], step: &Step) -> Vec<Range> {
+    let mut inputs: Vec<Range> = ranges.to_vec();
     let mut outputs = Vec::new();
 
     for map in step.maps.iter() {
@@ -132,7 +132,7 @@ mod tests {
         let s = Step {
             maps: vec![Map::new(50, 98, 2), Map::new(52, 50, 48)],
         };
-        let result = apply_step(&r, &s);
+        let result = apply_step(r, &s);
         assert_eq!(vec![Range::new(50, 52), Range::new(98, 100)], result);
     }
 }

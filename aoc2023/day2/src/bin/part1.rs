@@ -27,17 +27,14 @@ mod tests {
 
     #[test]
     fn test_valid_game() {
-        assert_eq!(
-            true,
-            valid_game(&vec![CubeCount::new(4, 3, 9)], &CubeCount::new(4, 5, 10))
-        );
+        assert!(valid_game(
+            &[CubeCount::new(4, 3, 9)],
+            &CubeCount::new(4, 5, 10)
+        ));
 
-        assert_eq!(
-            false,
-            valid_game(
-                &vec![CubeCount::new(4, 3, 9), CubeCount::new(5, 5, 10)],
-                &CubeCount::new(4, 5, 10)
-            )
-        );
+        assert!(valid_game(
+            &[CubeCount::new(4, 3, 9), CubeCount::new(5, 5, 10)],
+            &CubeCount::new(4, 5, 10)
+        ));
     }
 }
