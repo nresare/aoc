@@ -46,13 +46,9 @@ fn smallest(seeds: Vec<u64>, steps: &Vec<Step>) -> u64 {
 fn make_ranges(numbers: &Vec<u64>) -> Vec<Range> {
     let mut result = Vec::new();
     let mut numbers = numbers.iter();
-    loop {
-        if let Some(start) = numbers.next() {
-            let length =  *numbers.next().expect("numbers must be even pairs");
-            result.push(Range::new(*start, start + length));
-        } else {
-            break;
-        }
+    while let Some(start) = numbers.next() {
+        let length = *numbers.next().expect("numbers must be even pairs");
+        result.push(Range::new(*start, start + length));
     }
     result
 }
@@ -99,8 +95,8 @@ fn apply_step(seed: u64, step: &Step) -> u64 {
 
 #[cfg(test)]
 mod tests {
-    use crate::{apply_step, try_map, Map, Step, make_ranges};
     use crate::range::Range;
+    use crate::{apply_step, make_ranges, try_map, Map, Step};
 
     #[test]
     fn test_try_map() {
@@ -126,5 +122,4 @@ mod tests {
         let result = make_ranges(&vec![55, 8, 19, 7]);
         assert_eq!(vec![Range::new(55, 63), Range::new(19, 26)], result);
     }
-
 }

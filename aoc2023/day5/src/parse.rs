@@ -24,7 +24,7 @@ fn make_steps(lines: Lines) -> Vec<Step> {
     for line in lines {
         if line.contains("map") {
             continue;
-        } else if line == "" {
+        } else if line.is_empty() {
             result.push(Step { maps: maps.clone() });
             maps.clear();
         } else {

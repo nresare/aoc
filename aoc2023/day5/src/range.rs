@@ -3,7 +3,6 @@
 use crate::{Map, Step};
 use std::cmp::{max, min};
 
-
 #[derive(PartialEq, Debug, Clone)]
 pub struct Range {
     /// the start value
@@ -19,7 +18,9 @@ impl Range {
 
     fn delta(start: u64, end: u64, delta: i64) -> Self {
         Range {
-            start: start.checked_add_signed(delta).expect("can't subtract delta"),
+            start: start
+                .checked_add_signed(delta)
+                .expect("can't subtract delta"),
             end: end.checked_add_signed(delta).expect("can't subtract delta"),
         }
     }
@@ -54,7 +55,7 @@ struct ApplyResult {
 #[cfg(test)]
 impl ApplyResult {
     fn new(rest: Vec<Range>, mapped: Option<Range>) -> Self {
-        ApplyResult{rest, mapped}
+        ApplyResult { rest, mapped }
     }
 }
 
@@ -79,7 +80,7 @@ fn apply_map(range: &Range, map: &Map) -> ApplyResult {
                 max(map.source_start, range.start),
                 min(map_end, range.end),
                 map.dest_start as i64 - map.source_start as i64,
-            ))
+            )),
         }
     } else {
         ApplyResult { rest, mapped: None }
@@ -112,20 +113,25 @@ mod tests {
         );
         // case 4, range is both before and after map
         assert_eq!(
-            ApplyResult::new(vec![Range::new(8, 10), Range::new(13, 14)], Some(Range::new(10, 13))),
+            ApplyResult::new(
+                vec![Range::new(8, 10), Range::new(13, 14)],
+                Some(Range::new(10, 13))
+            ),
             apply_map(&Range::new(8, 14), m)
         );
         // case 5, range is completely after the map
-        assert_eq!(ApplyResult::new(vec![Range::new(13, 15)], None), apply_map(&Range::new(13, 15), m));
+        assert_eq!(
+            ApplyResult::new(vec![Range::new(13, 15)], None),
+            apply_map(&Range::new(13, 15), m)
+        );
     }
 
     #[test]
     fn test_apply_step() {
         let r = &vec![Range::new(96, 100)];
-        let s = Step{maps: vec![
-            Map::new(50, 98, 2),
-            Map::new(52, 50, 48),
-        ]};
+        let s = Step {
+            maps: vec![Map::new(50, 98, 2), Map::new(52, 50, 48)],
+        };
         let result = apply_step(&r, &s);
         assert_eq!(vec![Range::new(50, 52), Range::new(98, 100)], result);
     }
