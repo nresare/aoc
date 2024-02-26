@@ -9,3 +9,4 @@ edition = "2021"
 anyhow = "1.0.79"
 regex = { version = "1.10.3", features = [] }
 lazy_static = "1.4.0"
+num = "0.4.1"

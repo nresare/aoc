@@ -181,10 +181,10 @@ pub(crate) fn compare_by_card_value(a: &Hand, b: &Hand, positions: &[u8]) -> Ord
 
 #[cfg(test)]
 mod tests {
-    use crate::{convert_jokers, part_1_compare};
     use crate::Hand;
     use crate::HandType;
     use crate::HandType::*;
+    use crate::{convert_jokers, part_1_compare};
     use std::cmp::Ordering;
 
     #[test]
@@ -226,7 +226,10 @@ mod tests {
     fn cmp(first: &str, second: &str, expected: Ordering) {
         assert_eq!(
             expected,
-            part_1_compare(&(Hand::new(first).unwrap(),0), &(Hand::new(second).unwrap(),0)),
+            part_1_compare(
+                &(Hand::new(first).unwrap(), 0),
+                &(Hand::new(second).unwrap(), 0)
+            ),
         )
     }
 
